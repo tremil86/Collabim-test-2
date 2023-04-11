@@ -7,14 +7,18 @@ document.getElementById('searchForm').addEventListener('submit', function(event)
     .then(response => response.text())
     .then(data => {
         var searchResults = parseSearchResults(data);
-        downloadSearchResults(searchResults);
+        displaySearchResults(searchResults);
     })
     .catch(error => console.error(error));
 });
 
 function parseSearchResults(html) {
     const cheerio = require('cheerio');
+
+    // Načtení HTML pomocí Cheerio
     const $ = cheerio.load(html);
+
+    // Extrakce výsledků z Google vyhledávání
     const results = [];
     $('div.g').each((index, element) => {
         const titleElement = $(element).find('h3');
@@ -23,18 +27,25 @@ function parseSearchResults(html) {
         const link = linkElement.attr('href');
         results.push({ title, link });
     });
+
+    // Vrácení datové struktury s výsledky
     return results;
 }
 
-function downloadSearchResults(results) {
-    var json = JSON.stringify(results);
-    var blob = new Blob([json], {type: 'application/json'});
-    var url = URL.createObjectURL(blob);
-    var link = document.createElement('a');
-    link.href = url;
-    link.download = 'search_results.json';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+function displaySearchResults(results) {
+    var resultsContainer = document.createElement('div');
+    resultsContainer.id = 'searchResults';
+    resultsContainer.innerHTML = '<h2>Výsledky vyhledávání:</h2>';
+    for (var i = 0; i < results.length; i++) {
+        var resultItem = document.createElement('div');
+        var titleElement = document.createElement('h3');
+        titleElement.textContent = results[i].title;
+        resultItem.appendChild(titleElement);
+        var linkElement = document.createElement('a');
+        linkElement.href = results[i].link;
+        linkElement.textContent = results[i].link;
+        resultItem.appendChild(linkElement);
+        resultsContainer.appendChild(resultItem);
+    }
+    document.body.appendChild(resultsContainer);
 }
