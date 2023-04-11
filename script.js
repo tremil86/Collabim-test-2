@@ -13,22 +13,15 @@ document.getElementById('searchForm').addEventListener('submit', function(event)
 });
 
 function parseSearchResults(html) {
-    const cheerio = require('cheerio');
-
-    // Načtení HTML pomocí Cheerio
-    const $ = cheerio.load(html);
-
-    // Extrakce výsledků z Google vyhledávání
-    const results = [];
-    $('div.g').each((index, element) => {
-        const titleElement = $(element).find('h3');
-        const title = titleElement.text().trim();
-        const linkElement = titleElement.find('a');
-        const link = linkElement.attr('href');
+    var results = [];
+    var regex = /<div class="g">(.*?)<\/div>/g;
+    var match;
+    while ((match = regex.exec(html)) !== null) {
+        var result = match[1];
+        var title = /<h3 class="[^"]+">(.*?)<\/h3>/.exec(result)[1];
+        var link = /<a href="(\/url\?q=[^"]+)"/.exec(result)[1];
         results.push({ title, link });
-    });
-
-    // Vrácení datové struktury s výsledky
+    }
     return results;
 }
 
